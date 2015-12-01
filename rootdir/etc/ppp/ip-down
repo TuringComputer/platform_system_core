@@ -1,0 +1,8 @@
+#!/system/bin/sh
+case $1 in
+    ppp1)
+	echo 0 > /proc/sys/net/ipv4/ip_forward;
+	;;
+esac
+
+/system/bin/log -t pppd.ip-down "ppp0 ip-down"

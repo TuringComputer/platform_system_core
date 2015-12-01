@@ -1,0 +1,25 @@
+#!/system/bin/sh
+
+/system/bin/log -t pppd.stop "calling stop_pppd......'$1'"
+
+# make sure pppd is running before killing
+if ls /data/rril/ppp0.pid > /dev/null 2>&1; then
+
+    PPPD_PID="$(cat /data/rril/ppp0.pid)"
+    /system/bin/log -t pppd.stop "pppd pid='$PPPD_PID'"
+
+    # If pppd does not shutdown normally it could fail to clear its pid from gprs.pid.
+    # Therefore we are in risk of picking up a wrong pid (if pppd is not running) and killing 
+    # other process if we use this pid blindly. Ideally, we shall verify the pid by looking up
+    # the /proc/$PPPD_PID/cmdline file for the pppd command string.  However, it is difficult 
+    # to perform this check in the limited android shell.
+    # To be defensive, we remove the gprs.pid file in init.rc on device startup and in 
+    # init.gprs-pppd when pppd is launched.
+
+    kill -$1 $PPPD_PID
+
+else
+    /system/bin/log -t pppd.stop "ppp0.pid not found: pppd not running!"
+    exit 1
+
+fi
